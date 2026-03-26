@@ -102,31 +102,6 @@ npm run dev
 
 ---
 
-## 🏗️ Build & Publish
-
-### Build the Docker Image
-
-```bash
-docker build -t oktayparlak/s3-viewfy .
-```
-
-### Push to Docker Hub
-
-```bash
-docker login
-docker push oktayparlak/s3-viewfy
-```
-
-### Multi-Architecture Build (amd64 + arm64)
-
-```bash
-docker buildx build --platform linux/amd64,linux/arm64 \
-  -t oktayparlak/s3-viewfy:latest \
-  --push .
-```
-
----
-
 ## 🎨 Supported Providers
 
 | Provider | Endpoint Example |
