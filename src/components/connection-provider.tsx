@@ -107,6 +107,7 @@ export function ConnectionProvider({ children }: { children: React.ReactNode }) 
     setIsConnected(false);
     setDefaultBucket(null);
     setEnvConfigured(false);
+    setIsEnvConfigured(false);
   }, []);
 
   // Auto-connect from env on mount

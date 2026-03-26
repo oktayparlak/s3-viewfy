@@ -45,10 +45,12 @@ function AppContent() {
     <>
       <Header />
       <div className="flex flex-1 overflow-hidden relative">
-        <Sidebar
-          selectedBucket={selectedBucket}
-          onSelectBucket={setSelectedBucket}
-        />
+        {!defaultBucket && (
+          <Sidebar
+            selectedBucket={selectedBucket}
+            onSelectBucket={setSelectedBucket}
+          />
+        )}
         <FileBrowser bucket={selectedBucket} />
       </div>
       <ConnectionDialog
