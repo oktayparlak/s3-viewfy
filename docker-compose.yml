@@ -1,0 +1,20 @@
+services:
+  s3-viewfy:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      # Required: S3-compatible endpoint URL
+      - S3_ENDPOINT=https://s3.amazonaws.com
+      # Required: Access credentials
+      - S3_ACCESS_KEY_ID=your-access-key
+      - S3_SECRET_ACCESS_KEY=your-secret-key
+      # Required: Region
+      - S3_REGION=us-east-1
+      # Optional: Bucket name (leave empty to see all buckets)
+      - S3_BUCKET=
+      # Optional: Force path style (default: true, set to false for AWS virtual-hosted style)
+      - S3_FORCE_PATH_STYLE=true
+      # Optional: Authentication (both must be set to enable login)
+      - AUTH_USERNAME=admin
+      - AUTH_PASSWORD=changeme
