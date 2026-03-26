@@ -41,6 +41,15 @@ export function ConnectionProvider({ children }: { children: React.ReactNode }) 
   const [envConfigured, setEnvConfigured] = useState(false);
   const [defaultBucket, setDefaultBucket] = useState<string | null>(null);
 
+  // Safe JSON parser — returns null if response is not valid JSON
+  const safeJson = async (res: Response) => {
+    try {
+      return await res.json();
+    } catch {
+      return null;
+    }
+  };
+
   // Manual connect with client-provided credentials
   const connect = useCallback(async (newConfig: S3Config): Promise<boolean> => {
     setIsConnecting(true);
@@ -52,8 +61,8 @@ export function ConnectionProvider({ children }: { children: React.ReactNode }) 
       });
 
       if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Connection failed");
+        const data = await safeJson(res);
+        throw new Error(data?.error || `Connection failed (${res.status})`);
       }
 
       setConfig(newConfig);
@@ -80,8 +89,8 @@ export function ConnectionProvider({ children }: { children: React.ReactNode }) 
       });
 
       if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Connection failed");
+        const data = await safeJson(res);
+        throw new Error(data?.error || `Connection failed (${res.status})`);
       }
 
       // Set a placeholder config (actual credentials stay server-side)
@@ -115,7 +124,15 @@ export function ConnectionProvider({ children }: { children: React.ReactNode }) 
     async function checkEnvConfig() {
       try {
         const res = await fetch("/api/s3/config");
-        const data = await res.json();
+        if (!res.ok) {
+          setIsEnvConfigured(false);
+          return;
+        }
+        const data = await safeJson(res);
+        if (!data) {
+          setIsEnvConfigured(false);
+          return;
+        }
 
         if (data.configured) {
           setIsEnvConfigured(true);
