@@ -25,12 +25,12 @@ export function LoginScreen() {
   };
 
   return (
-    <div className="flex-1 flex items-center justify-center relative overflow-hidden">
+    <div className="flex-1 flex items-center justify-center relative overflow-hidden bg-gradient-to-br from-slate-100 via-gray-50 to-slate-100 dark:from-transparent dark:via-transparent dark:to-transparent">
       {/* Background gradient effects */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-radial from-cyan-500/10 via-transparent to-transparent rounded-full blur-3xl" />
         <div className="absolute -bottom-1/2 -right-1/2 w-full h-full bg-gradient-radial from-teal-500/10 via-transparent to-transparent rounded-full blur-3xl" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(0,0,0,0)_0%,rgba(0,0,0,0.8)_100%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(0,0,0,0)_0%,var(--login-vignette)_100%)]" />
       </div>
 
       <div className="relative z-10 w-full max-w-sm px-6">
@@ -43,7 +43,7 @@ export function LoginScreen() {
             </div>
           </div>
           <div>
-            <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-white via-white to-white/60 bg-clip-text text-transparent">
+            <h1 className="text-3xl font-bold tracking-tight text-foreground">
               S3 Viewfy
             </h1>
             <p className="text-sm text-muted-foreground mt-1">
@@ -55,7 +55,7 @@ export function LoginScreen() {
         {/* Login Form */}
         <form
           onSubmit={handleSubmit}
-          className="space-y-4 bg-card/50 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-2xl"
+          className="space-y-4 bg-white/90 dark:bg-card/80 backdrop-blur-xl border border-border/50 rounded-2xl p-6 shadow-2xl shadow-black/5 dark:shadow-black/30"
         >
           <div className="space-y-1.5">
             <Label htmlFor="login-username" className="text-sm">
@@ -66,7 +66,7 @@ export function LoginScreen() {
               placeholder="Enter username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="h-11 bg-white/5 border-white/10 focus:border-cyan-500/50 transition-colors"
+              className="h-11 bg-background/50 border-border/60 focus:border-cyan-500/50 transition-colors"
               autoComplete="username"
               required
             />
@@ -82,7 +82,7 @@ export function LoginScreen() {
               placeholder="Enter password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="h-11 bg-white/5 border-white/10 focus:border-cyan-500/50 transition-colors"
+              className="h-11 bg-background/50 border-border/60 focus:border-cyan-500/50 transition-colors"
               autoComplete="current-password"
               required
             />
