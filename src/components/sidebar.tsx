@@ -43,8 +43,10 @@ export function Sidebar({ selectedBucket, onSelectBucket }: SidebarProps) {
       });
 
       if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error);
+        const text = await res.text();
+        let msg = `Failed to load buckets (${res.status})`;
+        try { msg = JSON.parse(text).error || msg; } catch {}
+        throw new Error(msg);
       }
 
       const data = await res.json();

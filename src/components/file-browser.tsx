@@ -144,8 +144,10 @@ export function FileBrowser({ bucket }: FileBrowserProps) {
       });
 
       if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error);
+        const text = await res.text();
+        let msg = `Failed to load objects (${res.status})`;
+        try { msg = JSON.parse(text).error || msg; } catch {}
+        throw new Error(msg);
       }
 
       const data = await res.json();
@@ -183,8 +185,10 @@ export function FileBrowser({ bucket }: FileBrowserProps) {
       });
 
       if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error);
+        const text = await res.text();
+        let msg = `Download failed (${res.status})`;
+        try { msg = JSON.parse(text).error || msg; } catch {}
+        throw new Error(msg);
       }
 
       const data = await res.json();
@@ -211,8 +215,10 @@ export function FileBrowser({ bucket }: FileBrowserProps) {
       });
 
       if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error);
+        const text = await res.text();
+        let msg = `Delete failed (${res.status})`;
+        try { msg = JSON.parse(text).error || msg; } catch {}
+        throw new Error(msg);
       }
 
       toast.success(`Deleted: ${getFileName(deleteTarget)}`);
@@ -247,8 +253,10 @@ export function FileBrowser({ bucket }: FileBrowserProps) {
         });
 
         if (!res.ok) {
-          const data = await res.json();
-          throw new Error(data.error);
+          const text = await res.text();
+          let msg = `Upload failed (${res.status})`;
+          try { msg = JSON.parse(text).error || msg; } catch {}
+          throw new Error(msg);
         }
 
         toast.success(`Uploaded: ${file.name}`);
