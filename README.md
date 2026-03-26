@@ -6,6 +6,7 @@ Deploy it with Docker, pass your credentials as environment variables, and insta
 
 ![S3 Viewfy Screenshot](https://img.shields.io/badge/status-stable-brightgreen) ![License](https://img.shields.io/badge/license-MIT-blue) ![Docker](https://img.shields.io/badge/docker-ready-blue)
 
+[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/s3-viewfy?referralCode=zeN56g&utm_medium=integration&utm_source=template&utm_campaign=generic)
 ---
 
 ## ✨ Features
