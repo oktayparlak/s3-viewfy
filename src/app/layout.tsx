@@ -28,15 +28,27 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${inter.variable} ${jetBrainsMono.variable} dark h-full antialiased`}
+      className={`${inter.variable} ${jetBrainsMono.variable} h-full antialiased`}
     >
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                var t = localStorage.getItem('s3viewfy-theme') || 'dark';
+                document.documentElement.classList.add(t);
+              })();
+            `,
+          }}
+        />
+      </head>
       <body className="min-h-full flex flex-col">
         {children}
         <Toaster
           position="bottom-right"
           toastOptions={{
             className:
-              "border-white/10 bg-card/95 backdrop-blur-xl text-foreground",
+              "border-border/40 bg-card/95 backdrop-blur-xl text-foreground",
           }}
         />
       </body>

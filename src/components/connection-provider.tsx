@@ -21,9 +21,11 @@ interface ConnectionContextType {
   config: S3Config | null;
   isConnected: boolean;
   isConnecting: boolean;
-  isEnvConfigured: boolean | null; // null = still checking, true/false = resolved
+  isEnvConfigured: boolean | null;
+  useEnvConfig: boolean;
   defaultBucket: string | null;
   connect: (config: S3Config) => Promise<boolean>;
+  connectWithEnv: () => Promise<boolean>;
   disconnect: () => void;
 }
 
@@ -36,15 +38,17 @@ export function ConnectionProvider({ children }: { children: React.ReactNode }) 
   const [isConnected, setIsConnected] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [isEnvConfigured, setIsEnvConfigured] = useState<boolean | null>(null);
+  const [envConfigured, setEnvConfigured] = useState(false);
   const [defaultBucket, setDefaultBucket] = useState<string | null>(null);
 
+  // Manual connect with client-provided credentials
   const connect = useCallback(async (newConfig: S3Config): Promise<boolean> => {
     setIsConnecting(true);
     try {
       const res = await fetch("/api/s3/buckets", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newConfig),
+        body: JSON.stringify({ config: newConfig }),
       });
 
       if (!res.ok) {
@@ -65,13 +69,47 @@ export function ConnectionProvider({ children }: { children: React.ReactNode }) 
     }
   }, []);
 
+  // Connect using server-side env vars (no credentials sent to client)
+  const connectWithEnv = useCallback(async (): Promise<boolean> => {
+    setIsConnecting(true);
+    try {
+      const res = await fetch("/api/s3/buckets", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ useEnvConfig: true }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Connection failed");
+      }
+
+      // Set a placeholder config (actual credentials stay server-side)
+      setConfig({
+        endpoint: "env-configured",
+        accessKeyId: "",
+        secretAccessKey: "",
+        region: "",
+      });
+      setEnvConfigured(true);
+      setIsConnected(true);
+      return true;
+    } catch {
+      setIsConnected(false);
+      throw new Error("Failed to connect with environment configuration.");
+    } finally {
+      setIsConnecting(false);
+    }
+  }, []);
+
   const disconnect = useCallback(() => {
     setConfig(null);
     setIsConnected(false);
     setDefaultBucket(null);
+    setEnvConfigured(false);
   }, []);
 
-  // Auto-connect from environment variables on mount
+  // Auto-connect from env on mount
   useEffect(() => {
     async function checkEnvConfig() {
       try {
@@ -80,11 +118,10 @@ export function ConnectionProvider({ children }: { children: React.ReactNode }) 
 
         if (data.configured) {
           setIsEnvConfigured(true);
-          // Auto-connect with env config
+          setDefaultBucket(data.defaultBucket || null);
           try {
-            await connect(data.config);
+            await connectWithEnv();
           } catch {
-            // If auto-connect fails, let user connect manually
             setIsEnvConfigured(false);
           }
         } else {
@@ -96,7 +133,7 @@ export function ConnectionProvider({ children }: { children: React.ReactNode }) 
     }
 
     checkEnvConfig();
-  }, [connect]);
+  }, [connectWithEnv]);
 
   return (
     <ConnectionContext.Provider
@@ -105,8 +142,10 @@ export function ConnectionProvider({ children }: { children: React.ReactNode }) 
         isConnected,
         isConnecting,
         isEnvConfigured,
+        useEnvConfig: envConfigured,
         defaultBucket,
         connect,
+        connectWithEnv,
         disconnect,
       }}
     >

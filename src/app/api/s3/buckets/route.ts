@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { listBuckets, type S3Config } from "@/lib/s3";
+import { listBuckets } from "@/lib/s3";
+import { resolveS3Config } from "@/lib/s3-config";
 
 export async function POST(request: NextRequest) {
   try {
-    const config: S3Config = await request.json();
+    const body = await request.json();
+    const config = resolveS3Config(body);
 
-    if (!config.endpoint || !config.accessKeyId || !config.secretAccessKey) {
+    if (!config) {
       return NextResponse.json(
         { error: "Missing required S3 configuration" },
         { status: 400 }

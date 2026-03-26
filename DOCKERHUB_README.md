@@ -1,6 +1,6 @@
 # S3 Viewfy
 
-A modern web-based file manager for **any S3-compatible object storage**. Browse, upload, download, and delete files through a sleek dark-mode UI.
+A modern web-based file manager for **any S3-compatible object storage**. Browse, upload, download, and delete files with a sleek UI that supports both dark and light mode.
 
 Works with **AWS S3, MinIO, Cloudflare R2, DigitalOcean Spaces, Backblaze B2, Wasabi, Hetzner**, and more.
 
@@ -91,12 +91,15 @@ docker compose up -d
 ## Features
 
 - 📂 Browse buckets and folders with breadcrumb navigation
+- 📄 Pagination for large directories (50 items per page)
 - ⬆️ Upload files (drag & drop supported)
 - ⬇️ Download via presigned URLs
 - 🗑️ Delete with confirmation
 - 🔒 Built-in authentication (username/password via env vars)
-- 🔐 Credentials are server-side only, never exposed to the browser
-- 🎨 Premium dark mode UI
+- 🛡️ Login rate limiting (3 attempts/min per IP)
+- 🔐 Zero credential exposure — S3 keys never leave the server
+- 🌗 Light & dark mode with localStorage persistence
+- 🎨 Premium glassmorphism UI
 
 ---
 
@@ -104,8 +107,10 @@ docker compose up -d
 
 - Credentials are passed as **environment variables** — never baked into the image.
 - All S3 operations run **server-side** through API routes.
+- **Zero credential exposure** — config API returns only `configured: true/false`, no secrets.
 - Downloads use **presigned URLs** that expire after 1 hour.
 - Auth uses **HTTP-only cookies** (24h expiry).
+- Login is **rate-limited** to 3 attempts per minute per IP.
 
 ---
 

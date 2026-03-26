@@ -7,18 +7,36 @@ import { Badge } from "@/components/ui/badge";
 import {
   Database,
   Unplug,
-  Settings,
   Circle,
   LogOut,
+  Sun,
+  Moon,
 } from "lucide-react";
+import { useEffect, useState } from "react";
 
-interface HeaderProps {
-  onOpenConnection: () => void;
-}
-
-export function Header({ onOpenConnection }: HeaderProps) {
+export function Header() {
   const { isConnected, disconnect, config } = useConnection();
   const { isAuthEnabled, logout } = useAuth();
+  const [theme, setTheme] = useState<"dark" | "light">("dark");
+
+  useEffect(() => {
+    const saved = localStorage.getItem("s3viewfy-theme") as
+      | "dark"
+      | "light"
+      | null;
+    const initial = saved || "dark";
+    setTheme(initial);
+    document.documentElement.classList.toggle("dark", initial === "dark");
+    document.documentElement.classList.toggle("light", initial === "light");
+  }, []);
+
+  const toggleTheme = () => {
+    const next = theme === "dark" ? "light" : "dark";
+    setTheme(next);
+    localStorage.setItem("s3viewfy-theme", next);
+    document.documentElement.classList.toggle("dark", next === "dark");
+    document.documentElement.classList.toggle("light", next === "light");
+  };
 
   const handleDisconnect = async () => {
     disconnect();
@@ -28,7 +46,7 @@ export function Header({ onOpenConnection }: HeaderProps) {
   };
 
   return (
-    <header className="sticky top-0 z-50 h-16 border-b border-white/10 bg-background/80 backdrop-blur-xl">
+    <header className="sticky top-0 z-50 h-16 border-b border-border/40 bg-background/80 backdrop-blur-xl">
       <div className="flex h-full items-center justify-between px-6">
         {/* Logo */}
         <div className="flex items-center gap-3">
@@ -45,8 +63,22 @@ export function Header({ onOpenConnection }: HeaderProps) {
           </div>
         </div>
 
-        {/* Connection Status */}
+        {/* Actions */}
         <div className="flex items-center gap-3">
+          {/* Theme toggle */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleTheme}
+            className="h-8 w-8 text-muted-foreground hover:text-foreground"
+          >
+            {theme === "dark" ? (
+              <Sun className="h-4 w-4" />
+            ) : (
+              <Moon className="h-4 w-4" />
+            )}
+          </Button>
+
           {isConnected ? (
             <>
               <Badge
@@ -59,14 +91,6 @@ export function Header({ onOpenConnection }: HeaderProps) {
               <span className="text-xs text-muted-foreground max-w-[200px] truncate hidden sm:inline-block">
                 {config?.endpoint}
               </span>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={onOpenConnection}
-                className="h-8 w-8 text-muted-foreground hover:text-foreground"
-              >
-                <Settings className="h-4 w-4" />
-              </Button>
               <Button
                 variant="ghost"
                 size="sm"

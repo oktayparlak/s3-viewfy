@@ -12,14 +12,16 @@ Deploy it with Docker, pass your credentials as environment variables, and insta
 
 - **Universal S3 Support** — Works with AWS S3, MinIO, Cloudflare R2, DigitalOcean Spaces, Backblaze B2, Wasabi, Hetzner, and any S3-compatible provider.
 - **Built-in Authentication** — Protect access with username/password via environment variables.
-- **Browse & Navigate** — Folder hierarchy with breadcrumb navigation.
+- **Browse & Navigate** — Folder hierarchy with breadcrumb navigation and pagination.
 - **Upload Files** — Drag & drop or click to upload files to any bucket/folder.
 - **Download Files** — Generate presigned URLs for secure, direct downloads.
 - **Delete Objects** — Remove files with a confirmation dialog.
 - **Docker-First** — Ship it as a Docker image. Users just `docker run` with env vars.
-- **Environment Variable Auto-Connect** — Set credentials via env vars and the app connects automatically on startup. No manual login needed.
-- **Manual Mode** — When no env vars are set, users can enter credentials through a sleek connection dialog.
-- **Dark Mode UI** — Premium glassmorphism design with smooth animations.
+- **Environment Variable Auto-Connect** — Set credentials via env vars and the app connects automatically on startup.
+- **Manual Mode** — When no env vars are set, users can enter credentials through a connection dialog.
+- **Light & Dark Mode** — Toggle between themes with localStorage persistence.
+- **Login Rate Limiting** — Brute-force protection with 3 attempts per minute per IP.
+- **Zero Credential Exposure** — S3 credentials from env vars never leave the server, not even to the browser.
 - **File Type Icons** — Visual identification for images, videos, code, archives, and more.
 
 ---
@@ -175,6 +177,7 @@ s3-viewfy/
 │   │   └── file-browser.tsx  # File table with actions
 │   └── lib/
 │       ├── s3.ts             # S3 client utilities
+│       ├── s3-config.ts      # Server-side config resolver
 │       └── utils.ts          # Utility functions
 ├── Dockerfile                # Multi-stage Docker build
 ├── docker-compose.yml        # Docker Compose example
@@ -188,9 +191,11 @@ s3-viewfy/
 - Credentials are **never stored on disk** — they live in memory (or env vars) only.
 - When using Docker, credentials are passed as environment variables and never embedded in the image.
 - All S3 operations go through server-side API routes — credentials are never exposed to the browser.
+- **Zero credential exposure:** When using env vars, S3 credentials stay server-side. The config API only returns `configured: true/false` — no keys, endpoints, or secrets.
 - Downloads use **presigned URLs** that expire after 1 hour.
 - Authentication uses **HTTP-only cookies** for session management.
 - Sessions expire after **24 hours**.
+- Login is **rate-limited** to 3 attempts per minute per IP.
 
 ---
 

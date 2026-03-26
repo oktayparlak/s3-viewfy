@@ -50,6 +50,7 @@ import {
   FileCode,
   File,
   ChevronRight,
+  ChevronLeft,
   FolderOpen,
   Home,
   Loader2,
@@ -113,7 +114,7 @@ function getFileIcon(key: string) {
 }
 
 export function FileBrowser({ bucket }: FileBrowserProps) {
-  const { config } = useConnection();
+  const { config, useEnvConfig } = useConnection();
   const [objects, setObjects] = useState<S3ObjectItem[]>([]);
   const [prefix, setPrefix] = useState("");
   const [loading, setLoading] = useState(false);
@@ -122,7 +123,9 @@ export function FileBrowser({ bucket }: FileBrowserProps) {
   const [deleting, setDeleting] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const ITEMS_PER_PAGE = 50;
 
   const fetchObjects = useCallback(async () => {
     if (!config || !bucket) return;
@@ -133,7 +136,11 @@ export function FileBrowser({ bucket }: FileBrowserProps) {
       const res = await fetch("/api/s3/objects", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ config, bucket, prefix }),
+        body: JSON.stringify(
+          useEnvConfig
+            ? { useEnvConfig: true, bucket, prefix }
+            : { config, bucket, prefix }
+        ),
       });
 
       if (!res.ok) {
@@ -154,6 +161,7 @@ export function FileBrowser({ bucket }: FileBrowserProps) {
     if (bucket) {
       setPrefix("");
       setObjects([]);
+      setCurrentPage(1);
     }
   }, [bucket]);
 
@@ -167,7 +175,11 @@ export function FileBrowser({ bucket }: FileBrowserProps) {
       const res = await fetch("/api/s3/download", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ config, bucket, key }),
+        body: JSON.stringify(
+          useEnvConfig
+            ? { useEnvConfig: true, bucket, key }
+            : { config, bucket, key }
+        ),
       });
 
       if (!res.ok) {
@@ -191,7 +203,11 @@ export function FileBrowser({ bucket }: FileBrowserProps) {
       const res = await fetch("/api/s3/delete", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ config, bucket, key: deleteTarget }),
+        body: JSON.stringify(
+          useEnvConfig
+            ? { useEnvConfig: true, bucket, key: deleteTarget }
+            : { config, bucket, key: deleteTarget }
+        ),
       });
 
       if (!res.ok) {
@@ -217,7 +233,11 @@ export function FileBrowser({ bucket }: FileBrowserProps) {
       for (const file of Array.from(files)) {
         const formData = new FormData();
         formData.append("file", file);
-        formData.append("config", JSON.stringify(config));
+        if (useEnvConfig) {
+          formData.append("useEnvConfig", "true");
+        } else {
+          formData.append("config", JSON.stringify(config));
+        }
         formData.append("bucket", bucket);
         formData.append("prefix", prefix);
 
@@ -249,6 +269,7 @@ export function FileBrowser({ bucket }: FileBrowserProps) {
 
   const navigateToFolder = (folderKey: string) => {
     setPrefix(folderKey);
+    setCurrentPage(1);
   };
 
   const breadcrumbParts = prefix.split("/").filter(Boolean);
@@ -431,7 +452,12 @@ export function FileBrowser({ bucket }: FileBrowserProps) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {objects.map((obj) => (
+              {objects
+                .slice(
+                  (currentPage - 1) * ITEMS_PER_PAGE,
+                  currentPage * ITEMS_PER_PAGE
+                )
+                .map((obj) => (
                 <TableRow
                   key={obj.key}
                   className="border-white/5 hover:bg-white/[0.03] group cursor-pointer transition-colors"
@@ -504,13 +530,42 @@ export function FileBrowser({ bucket }: FileBrowserProps) {
         )}
       </div>
 
-      {/* Object count */}
+      {/* Footer: Object count + Pagination */}
       {!loading && objects.length > 0 && (
-        <div className="px-6 py-2 border-t border-white/10 bg-background/50">
+        <div className="px-6 py-2 border-t border-border/40 bg-background/50 flex items-center justify-between">
           <p className="text-[11px] text-muted-foreground">
             {objects.filter((o) => o.isFolder).length} folders,{" "}
             {objects.filter((o) => !o.isFolder).length} files
           </p>
+          {objects.length > ITEMS_PER_PAGE && (
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-7 w-7"
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage((p) => p - 1)}
+              >
+                <ChevronLeft className="h-3.5 w-3.5" />
+              </Button>
+              <span className="text-xs text-muted-foreground min-w-[80px] text-center">
+                Page {currentPage} of{" "}
+                {Math.ceil(objects.length / ITEMS_PER_PAGE)}
+              </span>
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-7 w-7"
+                disabled={
+                  currentPage >=
+                  Math.ceil(objects.length / ITEMS_PER_PAGE)
+                }
+                onClick={() => setCurrentPage((p) => p + 1)}
+              >
+                <ChevronRight className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+          )}
         </div>
       )}
 

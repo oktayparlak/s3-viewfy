@@ -23,7 +23,7 @@ interface SidebarProps {
 }
 
 export function Sidebar({ selectedBucket, onSelectBucket }: SidebarProps) {
-  const { config, isConnected } = useConnection();
+  const { config, isConnected, useEnvConfig } = useConnection();
   const [buckets, setBuckets] = useState<S3BucketItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -37,7 +37,9 @@ export function Sidebar({ selectedBucket, onSelectBucket }: SidebarProps) {
       const res = await fetch("/api/s3/buckets", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(config),
+        body: JSON.stringify(
+          useEnvConfig ? { useEnvConfig: true } : { config }
+        ),
       });
 
       if (!res.ok) {
