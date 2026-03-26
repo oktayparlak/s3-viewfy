@@ -27,5 +27,13 @@ docker-compose.yml
 
 # Docs
 README.md
+DOCKERHUB_README.md
+RAILWAY_README.md
 AGENTS.md
 CLAUDE.md
+
+# Env files — credentials must NEVER be baked into the image
+.env
+.env.*
+.env.local
+.env.production
